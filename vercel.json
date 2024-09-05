@@ -1,15 +1,18 @@
 {
   "version": 2,
+  "buildCommand": "pnpm build",
   "builds": [
     {
-      "src": "backend/build/index.js",
+      "src": "api/build/index.js",
       "use": "@vercel/node",
-      "config": { "includeFiles": ["backend/build/**"] }
+      "config": { "includeFiles": ["api/build/**"] }
     },
     {
-      "src": "frontend/build/**",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["frontend/build/**"] }
+      "src": "frontend/dist/**",
+      "use": "@vercel/static",
+      "config": {
+        "includeFiles": "frontend/dist/**,frontend/dist/index.html,frontend/dist/assets/**"
+      }
     }
   ],
   "routes": [
@@ -19,7 +22,19 @@
     },
     {
       "src": "/",
-      "dest": "frontend/build/index.html"
+      "dest": "frontend/dist/index.html"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "frontend/dist/assets/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "frontend/dist/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "frontend/dist/manifest.json"
     }
   ]
 }

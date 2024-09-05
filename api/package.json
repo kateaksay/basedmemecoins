@@ -4,12 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prebuild": "echo --- tslint -c tslint.json -p tsconfig.json --fix",
+    "build": "rimraf build && tsc",
+    "prestart": "npm run build",
+    "start": "node .",
+    "test": "jest --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.4",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.4"
   }
 }
