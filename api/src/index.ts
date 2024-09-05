@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-app.get("/api", (req: any, res: any) => res.send("Welcome to the Based Meme Coins API!"));
+app.get("/api/hello", (req: any, res: any) => res.send("Welcome to the Based Meme Coins API!"));
 
 app.listen(3000, () => console.log("Server ready."));
 
