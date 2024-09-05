@@ -1,8 +1,6 @@
-const express = require("express");
+import express from "express";
+import { Request, Response } from "express";
 const app = express();
-
-app.get("/api/hello", (req: any, res: any) => res.send("Welcome to the Based Meme Coins API!"));
-
+app.get("/api", (req: Request, res: Response) => res.send("Welcome to the Based Meme Coins API!"));
 app.listen(3000, () => console.log("Server ready."));
-
 module.exports = app;

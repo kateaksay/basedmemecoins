@@ -25,4 +25,5 @@ dist-ssr
 
 .env
 contracts/lib
+api/build
 .vercel
