@@ -1,0 +1,85 @@
+// // SPDX-License-Identifier: MIT
+// pragma solidity ^0.8.23;
+
+
+
+// import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+// import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+
+// import {PermissionCallable} from "smart-wallet-permissions/src/mixins/PermissionCallable.sol";
+
+// contract BasedMemeCoinUniswap is PermissionCallable {
+//     IUniswapV2Router02 public immutable uniswapRouter;
+//     address public immutable WETH;
+//     AggregatorV3Interface public priceFeed;
+
+//     uint public constant PERIOD = 10 minutes;
+
+//     constructor(address _uniswapRouter, address _priceFeed) {
+//         uniswapRouter = IUniswapV2Router02(_uniswapRouter);
+//         WETH = uniswapRouter.WETH();
+//         priceFeed = AggregatorV3Interface(_priceFeed);
+//     }
+
+//     // define which function selectors are callable by permissioned userOps
+//     function supportsPermissionedCallSelector(bytes4 selector) public pure override returns (bool) {
+//         return selector == Contract.swap.selector;
+//     }
+
+//     // callable by permissioned userOps
+//     function swap(address token) external payable {
+//         require(msg.value > 0, "Must send ETH");
+        
+//         // Calculate amountOutMin based on Uniswap TWAP
+//         uint256 amountOutMin = calculateAmountOutMin(msg.value, token);
+
+//         address[] memory path = new address[](2);
+//         path[0] = WETH;
+//         path[1] = token;
+
+//         uniswapRouter.swapExactETHForTokens{value: msg.value}(
+//             amountOutMin,
+//             path,
+//             address(this),
+//             block.timestamp
+//         );
+
+//         // Transfer the received tokens to the sender
+//         uint256 balance = IERC20(token).balanceOf(address(this));
+//         require(IERC20(token).transfer(msg.sender, balance), "Transfer failed");
+//     }
+
+//     function calculateAmountOutMin(uint256 ethAmount, address token) internal view returns (uint256) {
+//         address pair = IUniswapV2Factory(uniswapRouter.factory()).getPair(WETH, token);
+//         require(pair != address(0), "Pair does not exist");
+
+//         (uint256 reserve0, uint256 reserve1, uint32 blockTimestampLast) = IUniswapV2Pair(pair).getReserves();
+//         require(reserve0 > 0 && reserve1 > 0, "Insufficient liquidity");
+
+//         uint256 price0CumulativeLast = IUniswapV2Pair(pair).price0CumulativeLast();
+//         uint256 price1CumulativeLast = IUniswapV2Pair(pair).price1CumulativeLast();
+
+//         (uint256 reserve0After, uint256 reserve1After,) = IUniswapV2Pair(pair).getReserves();
+//         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
+//         uint32 timeElapsed = blockTimestamp - blockTimestampLast;
+
+//         uint256 price0Cumulative = price0CumulativeLast + uint256(UQ112x112.encode(reserve1After).uqdiv(reserve0After)) * timeElapsed;
+//         uint256 price1Cumulative = price1CumulativeLast + uint256(UQ112x112.encode(reserve0After).uqdiv(reserve1After)) * timeElapsed;
+
+//         uint256 averagePrice;
+//         if (WETH < token) {
+//             averagePrice = (price0Cumulative - price0CumulativeLast) / PERIOD;
+//         } else {
+//             averagePrice = (price1Cumulative - price1CumulativeLast) / PERIOD;
+//         }
+
+//         uint256 expectedTokens = (ethAmount * 1e18) / averagePrice;
+
+//         // Apply a slippage tolerance (e.g., 2%)
+//         return (expectedTokens * 98) / 100;
+//     }
+
+//     // Function to receive ETH when swapping
+//     receive() external payable {}
+// }
