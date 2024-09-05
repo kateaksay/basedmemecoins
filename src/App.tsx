@@ -113,7 +113,7 @@ export function App() {
               data: encodeFunctionData({
                 abi: contractAbi,
                 functionName: "buyCoin",
-                args: ["Mochi", "MOCHI", parseEther("0.0001")],
+                args: ["Mochi", "MOCHI"],
               }),
             },
           ],
