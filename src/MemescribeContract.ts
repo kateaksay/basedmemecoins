@@ -22,7 +22,6 @@ export const contractAbi = [
     inputs: [
       { name: "coinName", type: "string", internalType: "string" },
       { name: "coinSymbol", type: "string", internalType: "string" },
-      { name: "cost", type: "uint256", internalType: "uint256" },
     ],
     outputs: [],
     stateMutability: "payable",
