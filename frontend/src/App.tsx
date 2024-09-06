@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { encodeFunctionData, Hex, parseEther, toFunctionSelector, TransactionReceipt } from "viem";
+import { encodeFunctionData, Hex, parseEther, toFunctionSelector, TransactionReceipt, decodeEventLog } from "viem";
 import { useAccount, useConnect, useWalletClient } from "wagmi";
 import {
   useCallsStatus,
@@ -19,6 +19,7 @@ import "@coinbase/onchainkit/styles.css";
 
 import WalletComponent from "./WalletComponent.tsx";
 import OrderForm from "./OrderForm.tsx";
+import NFT from "./NFT.tsx";
 
 export function App() {
   const [permissionsContext, setPermissionsContext] = useState<
@@ -29,6 +30,7 @@ export function App() {
   >();
   const [callsId, setCallsId] = useState<string>();
   const [submitted, setSubmitted] = useState(false);
+  const [tokenIds, setTokenIds] = useState<(string | null)[]>([]);
 
   const account = useAccount();
   const { connectors, connect } = useConnect();
@@ -48,9 +50,37 @@ export function App() {
 
   useEffect(() => {
     if (callsStatus?.receipts?.[0]) {
-      setTransactions([...transactions, callsStatus.receipts[0] as TransactionReceipt]);
+      const newReceipt = callsStatus.receipts[0] as TransactionReceipt;
+      setTransactions([...transactions, newReceipt]);
+      
+      // Extract token ID from the transaction receipt
+      extractTokenId(newReceipt).then(tokenId => {
+        setTokenIds(prev => [...prev, tokenId]);
+      });
     }
   }, [callsStatus?.receipts]);
+
+  const extractTokenId = async (receipt: TransactionReceipt): Promise<string | null> => {
+    for (const log of receipt.logs) {
+      if (log.address === contractAddress) {
+        try {
+          const event = decodeEventLog({
+            abi: contractAbi,
+            data: log.data,
+            topics: log.topics,
+          });
+
+          if (
+            event.eventName === "MemeCoinBought") {
+            return event.args ? (event.args as any).tokenId.toString() : null;
+          }
+      } catch (error) {
+          console.error("Error decoding log:", error);
+        }
+      }
+    }
+    return null;
+  };
 
   const login = async () => {
     connect({ connector: connectors[0] });
@@ -101,6 +131,7 @@ export function App() {
   };
 
   const click = async () => {
+
     if (account.address && permissionsContext && credential && walletClient) {
       setSubmitted(true);
       setCallsId(undefined);
@@ -154,33 +185,32 @@ export function App() {
           )}
         </div>
 
-        <OrderForm grantPermissions={grantPermissions} />
+        <OrderForm grantPermissions={grantPermissions} permissionsContext={permissionsContext} />
 
-        <div className="flex flex-col items-center gap-2 mt-4 bg-white bg-opacity-80 rounded-lg p-4">
-          {account.address && permissionsContext && (
+        {account.address && permissionsContext && (
+          <div className="flex flex-col items-center gap-4 mt-4 bg-white bg-opacity-80 rounded-lg p-4 max-w-md mx-auto">
             <button
               type="button"
               onClick={click}
-              className="bg-purple-500 text-white text-xl text-bold text-black px-4 py-2 rounded"
+              className="w-full bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={
                 submitted ||
                 (!!callsId && !(callsStatus?.status === "CONFIRMED"))
               }
             >
-              Buy Me Meme Coins
+              Buy my coins now
             </button>
-          )}
-
-          {transactions.map((transaction) => (
-            <a
-              href={`https://base-sepolia.blockscout.com/tx/${transaction.transactionHash}`}
-              target="_blank"
-              className="mt-4 hover:underline"
-            >
-              Transaction {transaction.transactionHash.slice(0, 10)}... {transaction.status}.
-            </a>
-          ))}
-        </div>
+          
+            <div className="flex flex-row flex-wrap gap-2 mt-4">
+              {transactions.map((transaction, index) => (
+                <div key={transaction.transactionHash}>
+                  <NFT tokenId={tokenIds[index] || "0"} transactionHash={transaction.transactionHash} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
       </div>
     </div>
   );
