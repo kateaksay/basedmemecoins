@@ -1,44 +1,148 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { parseEther } from 'viem';
-import { useAccount } from 'wagmi';
+import { decodeEventLog, encodeFunctionData, parseEther, TransactionReceipt } from 'viem';
+import { useAccount, useWalletClient } from 'wagmi';
+import { signWithCredential } from 'webauthn-p256';
+import { contractAbi, contractAddress } from './MemescribeContract';
+import { useSendCalls, useCallsStatus } from 'wagmi/experimental';
+import NFT from './NFT';
 
 const cryptoCoins = ['Mochi', 'TYBG', 'Brett', 'Miggles', 'Toshi', 'Keycat', 'Mobi'];
 const durationOptions = ["every day", "every week"];
 
-export default function OrderForm({grantPermissions, permissionsContext}: {grantPermissions: (allowance: bigint, period: number) => void, permissionsContext: any}) {
-  const [selectedCoin, setSelectedCoin] = useState('');
-  const [order, setOrder] = useState('Buy me based cat coins.');
-  const [budget, setBudget] = useState('0.01');
-  const [duration, setDuration] = useState('every day');
-  const account = useAccount();
+export default function OrderForm({
+  grantPermissions,
+  permissionsContext,
+  credential,
+}: {
+  grantPermissions: (allowance: bigint, period: number) => void;
+  permissionsContext: any;
+  credential: any;
+}) {
+  const [selectedCoin, setSelectedCoin] = useState("");
+  const [order, setOrder] = useState("Buy me based cat coins.");
+  const [budget, setBudget] = useState("0.01");
+  const [duration, setDuration] = useState("every day");
+  const [callsId, setCallsId] = useState<string>();
+  const [submitted, setSubmitted] = useState(false);
+  const [tokenIds, setTokenIds] = useState<(string | null)[]>([]);
 
-  const click = async () => {
-    axios.post("/api/invest", {
-      prompt: order,
-      amount: budget,
-    }).then((response) => {
-      console.log(response.data);
-    });
+  const account = useAccount();
+  const { data: walletClient } = useWalletClient({ chainId: 84532 });
+  const { sendCallsAsync } = useSendCalls();
+  const { data: callsStatus } = useCallsStatus({
+    id: callsId as string,
+    query: {
+      enabled: !!callsId,
+      refetchInterval: (data) =>
+        data.state.data?.status === "PENDING" ? 500 : false,
+    },
+  });
+
+    const [transactions, setTransactions] = useState<TransactionReceipt[]>([]);
+
+    useEffect(() => {
+      if (callsStatus?.receipts?.[0]) {
+        const newReceipt = callsStatus.receipts[0] as TransactionReceipt;
+        setTransactions([...transactions, newReceipt]);
+
+        // Extract token ID from the transaction receipt
+        extractTokenId(newReceipt).then((tokenId) => {
+          setTokenIds((prev) => [...prev, tokenId]);
+        });
+      }
+    }, [callsStatus?.receipts]);
+
+      const extractTokenId = async (
+        receipt: TransactionReceipt
+      ): Promise<string | null> => {
+        for (const log of receipt.logs) {
+          if (log.address === contractAddress) {
+            try {
+              const event = decodeEventLog({
+                abi: contractAbi,
+                data: log.data,
+                topics: log.topics,
+              });
+
+              if (event.eventName === "MemeCoinBought") {
+                return event.args
+                  ? (event.args as any).tokenId.toString()
+                  : null;
+              }
+            } catch (error) {
+              console.error("Error decoding log:", error);
+            }
+          }
+        }
+    return null;
+  };
+
+  const onInvest = async () => {
+    axios
+      .post("/api/invest", {
+        prompt: order,
+        amount: budget,
+      })
+      .then(async (response) => {
+        const coins = response.data.coins;
+        const coinCalls = coins.map((coin: any) => ({
+          to: contractAddress,
+          value: parseEther(coin.amount),
+          data: encodeFunctionData({
+            abi: contractAbi,
+            functionName: "buyCoin",
+            args: [coin.name, coin.symbol],
+          }),
+        }));
+
+        if (
+          account.address &&
+          permissionsContext &&
+          credential &&
+          walletClient
+        ) {
+          setSubmitted(true);
+          setCallsId(undefined);
+          try {
+            const callsId = await sendCallsAsync({
+              calls: coinCalls,
+              capabilities: {
+                permissions: {
+                  context: permissionsContext,
+                },
+                paymasterService: {
+                  url: import.meta.env.VITE_PAYMASTER_URL, // Your paymaster service URL
+                },
+              },
+              signatureOverride: signWithCredential(credential),
+            });
+            setCallsId(callsId);
+          } catch (e: unknown) {
+            console.error(e);
+          }
+          setSubmitted(false);
+        }
+      });
   };
 
   function optionToPeriod(option: string): number {
-      switch (option) {
-          case 'every day':
-              return 86400; // 24 hours in seconds
-          case 'every week':
-              return 604800; // 7 days in seconds
-          case 'every 4 weeks':
-              return 2419200; // 4 weeks in seconds
-          default:
-              return 86400; // Default to daily if unknown option
-      }
+    switch (option) {
+      case "every day":
+        return 86400; // 24 hours in seconds
+      case "every week":
+        return 604800; // 7 days in seconds
+      case "every 4 weeks":
+        return 2419200; // 4 weeks in seconds
+      default:
+        return 86400; // Default to daily if unknown option
+    }
   }
 
   useEffect(() => {
-      if (selectedCoin) {
-          setOrder(order + `\nBuy me ${selectedCoin}.`);
-      }
+    if (selectedCoin) {
+      setOrder(order + `\nBuy me ${selectedCoin}.`);
+    }
   }, [selectedCoin]);
 
   return (
@@ -101,24 +205,38 @@ export default function OrderForm({grantPermissions, permissionsContext}: {grant
         </select>
       </div>
 
-      <button
-        disabled={!account.isConnected}
-        onClick={() =>
-          grantPermissions(parseEther(budget), optionToPeriod(duration))
-        }
-        className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Memescribe
-      </button>
+      {!permissionsContext && (
+        <button
+          disabled={!account.isConnected}
+          onClick={() =>
+            grantPermissions(parseEther(budget), optionToPeriod(duration))
+          }
+          className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Memescribe
+        </button>
+      )}
 
       {permissionsContext && (
         <button
           className="w-full bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={click}
+          onClick={onInvest}
+          disabled={submitted}
         >
           Buy me coins
         </button>
       )}
+
+      <div className="flex flex-row flex-wrap gap-2 mt-4">
+        {transactions.map((transaction, index) => (
+          <div key={transaction.transactionHash}>
+            <NFT
+              tokenId={tokenIds[index] || "0"}
+              transactionHash={transaction.transactionHash}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

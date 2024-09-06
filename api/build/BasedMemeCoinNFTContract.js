@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.basedMemeCoinNFT_ABI = void 0;
+exports.basedMemeCoinNFT_ABI = exports.contractAddressNFT = void 0;
+exports.contractAddressNFT = "0xaa60eb1436b6c006f9d6994c64281863fa8918ea";
 exports.basedMemeCoinNFT_ABI = [
     {
         inputs: [],
@@ -629,4 +630,4 @@ exports.basedMemeCoinNFT_ABI = [
         type: "function",
     },
 ];
-//# sourceMappingURL=BasedMemeCoinNFT_abi.js.map
+//# sourceMappingURL=BasedMemeCoinNFTContract.js.map

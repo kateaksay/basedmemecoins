@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { createPublicClient, formatEther, http } from 'viem';
+import { createPublicClient, createWalletClient, http, formatEther, parseEther, encodeFunctionData } from 'viem';
 import { baseSepolia } from 'viem/chains';
-import { basedMemeCoinNFT_ABI } from "./BasedMemeCoinNFT_abi";
 import axios from "axios";
+import { basedMemeCoinNFT_ABI, contractAddressNFT } from "./BasedMemeCoinNFTContract";
+
 
 const app = express();
 
@@ -14,16 +15,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Create a public client
 const client = createPublicClient({
-  chain: baseSepolia,
+  chain: baseSepolia as any,
   transport: http()
 });
-
-const contractAddress = "0xaa60eb1436b6c006f9d6994c64281863fa8918ea";
 
 const getTokenMetadata = async (tokenId: string): Promise<any> => {
      try {
         return await client.readContract({
-          address: contractAddress,
+          address: contractAddressNFT,
           abi: basedMemeCoinNFT_ABI,
           functionName: "getMemeCoin",
           args: [BigInt(tokenId)],
@@ -88,7 +87,6 @@ async function getBaseEcosystemCoins() {
   }
 }
 
-
 app.post("/api/invest", async (req: any, res: any) => {
     console.log(req.body);
 
@@ -133,24 +131,29 @@ app.post("/api/invest", async (req: any, res: any) => {
 
     // send a request to chatgpt
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "gpt-4",
-            messages: [{ role: "user", content: fullPrompt }],
-            max_tokens: 1000,
-            temperature: 0.5,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-        }),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [{ role: "user", content: fullPrompt }],
+        max_tokens: 1000,
+        temperature: 0.5,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      }),
     });
 
     const data = await response.json();
-    res.json(data.choices[0].message.content);
+    if (data.choices) {
+      const recommendations = JSON.parse(data.choices[0].message.content);
+      res.json(recommendations);
+    } else {
+      res.status(500).json({ error: "Failed to generate recommendations" });
+    }
 });
 
 app.listen(3000, () => console.log("Server ready."));

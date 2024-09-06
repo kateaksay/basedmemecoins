@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPublicClient, http } from 'viem';
 import { baseSepolia } from 'viem/chains';
-import { basedMemeCoinNFT_ABI, contractAddressNFT } from './BasedMemeCoinNFT_abi';
+import { basedMemeCoinNFT_ABI, contractAddressNFT } from './BasedMemeCoinNFTContract';
 import axios from 'axios';
 
 interface NFTProps {
@@ -63,7 +63,7 @@ const NFT: React.FC<NFTProps> = ({ tokenId, transactionHash }) => {
         <div className="w-32 bg-white rounded-lg shadow-lg p-1">
         <img
             className=""
-            src="https://raw.seadn.io/files/cdc553b36fed52f31fea91729181ba07.svg"
+            src={nftData.image}
             alt={nftData.name}
         />
         </div>

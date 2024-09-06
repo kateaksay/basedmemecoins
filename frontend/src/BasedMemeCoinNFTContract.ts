@@ -1,3 +1,5 @@
+export const contractAddressNFT = "0xaa60eb1436b6c006f9d6994c64281863fa8918ea";
+
 export const basedMemeCoinNFT_ABI = [
   {
     inputs: [] as any,

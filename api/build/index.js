@@ -16,8 +16,8 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const viem_1 = require("viem");
 const chains_1 = require("viem/chains");
-const BasedMemeCoinNFT_abi_1 = require("./BasedMemeCoinNFT_abi");
 const axios_1 = __importDefault(require("axios"));
+const BasedMemeCoinNFTContract_1 = require("./BasedMemeCoinNFTContract");
 const app = (0, express_1.default)();
 // Enable CORS for all routes
 app.use((0, cors_1.default)());
@@ -28,12 +28,11 @@ const client = (0, viem_1.createPublicClient)({
     chain: chains_1.baseSepolia,
     transport: (0, viem_1.http)()
 });
-const contractAddress = "0xaa60eb1436b6c006f9d6994c64281863fa8918ea";
 const getTokenMetadata = (tokenId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         return yield client.readContract({
-            address: contractAddress,
-            abi: BasedMemeCoinNFT_abi_1.basedMemeCoinNFT_ABI,
+            address: BasedMemeCoinNFTContract_1.contractAddressNFT,
+            abi: BasedMemeCoinNFTContract_1.basedMemeCoinNFT_ABI,
             functionName: "getMemeCoin",
             args: [BigInt(tokenId)],
         });
@@ -132,7 +131,7 @@ app.post("/api/invest", (req, res) => __awaiter(void 0, void 0, void 0, function
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
             model: "gpt-4",
@@ -145,7 +144,13 @@ app.post("/api/invest", (req, res) => __awaiter(void 0, void 0, void 0, function
         }),
     });
     const data = yield response.json();
-    res.json(data.choices[0].message.content);
+    if (data.choices) {
+        const recommendations = JSON.parse(data.choices[0].message.content);
+        res.json(recommendations);
+    }
+    else {
+        res.status(500).json({ error: "Failed to generate recommendations" });
+    }
 }));
 app.listen(3000, () => console.log("Server ready."));
 module.exports = app;
