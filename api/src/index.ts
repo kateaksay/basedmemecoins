@@ -37,7 +37,7 @@ app.get("/api/nfts/basedmemecoins/:tokenId", async (req: any, res: any) => {
     res.json({
       name: result.symbol,
       description: `Bought ${formatEther(result.cost)} worth of  ${result.name}`,
-      image: `https://basedmemecoins.com/api/nfts/basedmemecoins/${tokenId}/image.svg`,
+      image: `https://basedmemecoins.vercel.app/api/nfts/basedmemecoins/${tokenId}/image.svg`,
     });
 });
 

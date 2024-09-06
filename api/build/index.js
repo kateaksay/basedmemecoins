@@ -45,7 +45,7 @@ app.get("/api/nfts/basedmemecoins/:tokenId", (req, res) => __awaiter(void 0, voi
     res.json({
         name: result.symbol,
         description: `Bought ${(0, viem_1.formatEther)(result.cost)} worth of  ${result.name}`,
-        image: `https://basedmemecoins.com/api/nfts/basedmemecoins/${tokenId}/image.svg`,
+        image: `https://basedmemecoins.vercel.app/api/nfts/basedmemecoins/${tokenId}/image.svg`,
     });
 }));
 app.get("/api/nfts/basedmemecoins/:tokenId/image.svg", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
