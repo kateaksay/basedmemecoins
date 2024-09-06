@@ -14,7 +14,7 @@ export default function OrderForm({grantPermissions, permissionsContext}: {grant
   const account = useAccount();
 
   const click = async () => {
-    axios.post("http://localhost:3000/api/invest", {
+    axios.post(import.meta.env.PUBLIC_API_URL + "/api/invest", {
       prompt: order,
       amount: budget,
     }).then((response) => {
