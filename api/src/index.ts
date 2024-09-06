@@ -97,7 +97,7 @@ app.post("/api/invest", async (req: any, res: any) => {
 
     const fullPrompt = 
     `You are an expert in crypto and finance. You are recommending
-    based meme coins on the BASE network. Here are the coins available:
+    based meme coins on the Base network. Here are the coins available:
 
     ${coins.map((coin: any) => `${coin.name} (${coin.symbol})`).join("\n")}
     
@@ -122,7 +122,7 @@ app.post("/api/invest", async (req: any, res: any) => {
             },
             {
                 "name": "Coin Name 2",
-                "symbol": "COIN 2",
+                "symbol": "COIN2",
                 "amount": "0.00005"
             }
         ]

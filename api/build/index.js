@@ -95,7 +95,7 @@ app.post("/api/invest", (req, res) => __awaiter(void 0, void 0, void 0, function
     const coins = yield getBaseEcosystemCoins();
     const { prompt, amount } = req.body;
     const fullPrompt = `You are an expert in crypto and finance. You are recommending
-    based meme coins on the BASE network. Here are the coins available:
+    based meme coins on the Base network. Here are the coins available:
 
     ${coins.map((coin) => `${coin.name} (${coin.symbol})`).join("\n")}
     
@@ -120,7 +120,7 @@ app.post("/api/invest", (req, res) => __awaiter(void 0, void 0, void 0, function
             },
             {
                 "name": "Coin Name 2",
-                "symbol": "COIN 2",
+                "symbol": "COIN2",
                 "amount": "0.00005"
             }
         ]
