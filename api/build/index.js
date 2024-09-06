@@ -53,7 +53,7 @@ app.get("/api/nfts/basedmemecoins/:tokenId/image.svg", (req, res) => __awaiter(v
     const result = yield getTokenMetadata(tokenId);
     const symbol = result.symbol; // Added token symbol
     const transferAmount = (0, viem_1.formatEther)(result.cost); // Added transfer amount
-    const image = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+    const image = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <rect width="512" height="512" fill="#000" />
         <text x="50%" y="40%" font-family="monospace" font-size="72" fill="#fff" text-anchor="middle">${symbol}</text>
         <text x="50%" y="60%" font-family="monospace" font-size="36" fill="#fff" text-anchor="middle">${transferAmount} ETH</text>
