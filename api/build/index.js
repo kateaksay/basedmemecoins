@@ -63,6 +63,7 @@ app.get("/api/nfts/basedmemecoins/:tokenId/image.svg", (req, res) => __awaiter(v
         <text x="50%" y="40%" font-family="monospace" font-size="72" fill="#fff" text-anchor="middle">${symbol}</text>
         <text x="50%" y="60%" font-family="monospace" font-size="36" fill="#fff" text-anchor="middle">${transferAmount} ETH</text>
     </svg>`;
+    res.setHeader('Content-Type', 'image/svg+xml');
     res.send(image);
 }));
 function getBaseEcosystemCoins() {
