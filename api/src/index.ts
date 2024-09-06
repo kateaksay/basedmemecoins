@@ -110,7 +110,7 @@ app.post("/api/invest", async (req: any, res: any) => {
 
     Divide the amount of ${amount/24.0} units between 1 to 5 investments based 
     on client prompt and your own knowledge. Use up to 8th significant digits.
-    Coins can have different amounts invested.
+    Invest different amounts for each coin based on your knowledge of the coin.
 
     Only respond with a single JSON:
     {
