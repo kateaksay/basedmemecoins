@@ -61,7 +61,7 @@ app.get("/api/nfts/basedmemecoins/:tokenId/image.svg", (req, res) => __awaiter(v
     const image = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <rect width="512" height="512" fill="#000" />
         <text x="50%" y="40%" font-family="monospace" font-size="72" fill="#fff" text-anchor="middle">${symbol}</text>
-        <text x="50%" y="60%" font-family="monospace" font-size="36" fill="#fff" text-anchor="middle">${transferAmount} ETH</text>
+        <text x="50%" y="60%" font-family="monospace" font-size="36" fill="#fff" text-anchor="middle">${parseFloat(transferAmount).toFixed(8)} ETH</text>
     </svg>`;
     res.setHeader('Content-Type', 'image/svg+xml');
     res.send(image);
@@ -106,8 +106,9 @@ app.post("/api/invest", (req, res) => __awaiter(void 0, void 0, void 0, function
     ${prompt}. 
     """
 
-    Divide the amount of ${amount} units between investments based 
-    on client prompt and your own knowledge.
+    Divide the amount of ${amount / 24.0} units between 1 to 5 investments based 
+    on client prompt and your own knowledge. Use up to 8th significant digits.
+    Coins can have different amounts invested.
 
     Only respond with a single JSON:
     {

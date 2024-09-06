@@ -47,8 +47,8 @@ export default function OrderForm({
         setTransactions([...transactions, newReceipt]);
 
         // Extract token ID from the transaction receipt
-        extractTokenIds(newReceipt).then((tokenIds) => {
-          setTokenIds((prev) => [...prev, ...(tokenIds || [])]);
+        extractTokenIds(newReceipt).then((newTokenIds) => {
+          setTokenIds((prev) => [...prev, newTokenIds ? newTokenIds.join(',') : null]);
         });
       }
     }, [callsStatus?.receipts]);
@@ -79,6 +79,7 @@ export default function OrderForm({
   };
 
   const onInvest = async () => {
+    setSubmitted(true);
     axios
       .post("/api/invest", {
         prompt: order,
@@ -102,7 +103,6 @@ export default function OrderForm({
           credential &&
           walletClient
         ) {
-          setSubmitted(true);
           setCallsId(undefined);
           try {
             const callsId = await sendCallsAsync({
@@ -218,25 +218,36 @@ export default function OrderForm({
       )}
 
       {permissionsContext && (
-        <button
-          className="w-full bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={onInvest}
-          disabled={submitted}
-        >
-          Buy me coins
-        </button>
-      )}
-
-      <div className="flex flex-row flex-wrap gap-2 mt-4">
-        {transactions.map((transaction, index) => (
-          <div key={transaction.transactionHash}>
-            <NFT
-              tokenId={tokenIds[index] || "0"}
-              transactionHash={transaction.transactionHash}
-            />
+        <div>
+          {submitted ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-4 h-4 bg-purple-500 rounded-full animate-bounce"></div>
+              <div className="w-4 h-4 bg-purple-500 rounded-full animate-bounce delay-100"></div>
+              <div className="w-4 h-4 bg-purple-500 rounded-full animate-bounce delay-200"></div>
+              <p className="text-purple-500 font-bold">Buying based coins...</p>
+            </div>
+          ) : (
+            <button
+              className="w-full bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onInvest}
+              disabled={submitted}
+            >
+              Buy me coins
+            </button>
+          )}
+          <div className="flex flex-row flex-wrap gap-2 mt-4">
+            {transactions.map((transaction, index) => (
+              tokenIds[index] ? tokenIds[index].split(',').map((id) => (
+                <NFT
+                  key={id}
+                  tokenId={id}
+                  transactionHash={transaction.transactionHash}
+                />
+              )) : null
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
