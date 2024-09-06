@@ -59,14 +59,14 @@ const NFT: React.FC<NFTProps> = ({ tokenId, transactionHash }) => {
   if (!nftData) return <div>No NFT data found</div>;
 
   return (
-    <a href={`https://sepolia.etherscan.io/tx/${nftData.transactionHash}`} target="_blank" rel="noopener noreferrer">
-        <div className="w-32 bg-white rounded-lg shadow-lg p-1">
-        <img
-            className=""
-            src={nftData.image}
-            alt={nftData.name}
-        />
-        </div>
+    <a
+      href={`https://sepolia.basescan.org/tx/${nftData.transactionHash}`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <div className="w-32 bg-white rounded-lg shadow-lg p-1">
+        <img className="" src={nftData.image} alt={nftData.name} />
+      </div>
     </a>
   );
 };

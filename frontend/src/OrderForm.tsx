@@ -47,35 +47,35 @@ export default function OrderForm({
         setTransactions([...transactions, newReceipt]);
 
         // Extract token ID from the transaction receipt
-        extractTokenId(newReceipt).then((tokenId) => {
-          setTokenIds((prev) => [...prev, tokenId]);
+        extractTokenIds(newReceipt).then((tokenIds) => {
+          setTokenIds((prev) => [...prev, ...(tokenIds || [])]);
         });
       }
     }, [callsStatus?.receipts]);
 
-      const extractTokenId = async (
-        receipt: TransactionReceipt
-      ): Promise<string | null> => {
-        for (const log of receipt.logs) {
-          if (log.address === contractAddress) {
-            try {
-              const event = decodeEventLog({
-                abi: contractAbi,
-                data: log.data,
-                topics: log.topics,
-              });
+    const extractTokenIds = async (
+      receipt: TransactionReceipt
+    ): Promise<string[] | null> => {
+      let ids = [];
+      for (const log of receipt.logs) {
+        if (log.address === contractAddress) {
+          try {
+            const event = decodeEventLog({
+              abi: contractAbi,
+              data: log.data,
+              topics: log.topics,
+            });
 
-              if (event.eventName === "MemeCoinBought") {
-                return event.args
-                  ? (event.args as any).tokenId.toString()
-                  : null;
-              }
-            } catch (error) {
-              console.error("Error decoding log:", error);
+            if (event.eventName === "MemeCoinBought" && event.args) {
+              ids.push((event.args as any).tokenId.toString());
             }
-          }
+          
+        } catch (error) {
+          console.error("Error decoding log:", error);
         }
-    return null;
+      }
+    }
+    return ids;
   };
 
   const onInvest = async () => {
