@@ -14,7 +14,6 @@ app.get("/api/nfts/basedmemecoins/:tokenId", (req, res) => {
         name: "Based Meme Coin",
         description: "Based Meme Coin",
         image: "https://basedmemecoins.vercel.app/api/nfts/basedmemecoins/" + tokenId + "/image.svg",
-        tokenId,
     });
 });
 app.get("/api/nfts/basedmemecoins/:tokenId/image.svg", (req, res) => {
