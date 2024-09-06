@@ -1,50 +1,19 @@
-# React + TypeScript + Vite
+# Based Meme Coins
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a Base team hack week project and it is hosted on https://basedmemecoins.vercel.app/
 
-Currently, two official plugins are available:
+Based Meme Coins is an app that buys meme coins on Base on your behalf. After you provide a budget for it, the app decides on the coins to buy and the amount to invest in them.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Product Integrations
 
-## Expanding the ESLint configuration
+- App is built on [Base](https://base.org/).
+- Wallet and transactions via [Coinbase Smart Wallet](https://www.smartwallet.dev/why).
+- Wallet component is powered by [OnchainKit](https://onchainkit.xyz/) and [Basenames](https://www.base.org/names).
+- App receives user's approval to buy meme coins in regular intervals via [Smart Wallet Session Keys](https://www.smartwallet.dev/guides/session-keys).
+- Session key UserOps are sponsored by [Coinbase Paymaster](https://portal.cdp.coinbase.com/products/bundler-and-paymaster).
+- Base coin list is fed to the AI by [CoinGecko API](https://www.coingecko.com/en/api).
+- AI prompts to buy meme coins are run against [ChatGPT](https://openai.com/chatgpt/).
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## To Do
+- Due to low liquidity and lack of meme coin contracts in Base Sepolia, token purchase happens in the app via buying an NFT. When the app is ready for Base Mainnet, Mint contract will be replaced by the Swap contract.
+- Add a schedular to run the purchases regularly based on user's settings.
