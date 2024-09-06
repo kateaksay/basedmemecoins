@@ -7,7 +7,7 @@ import { contractAbi, contractAddress } from './MemescribeContract';
 import { useSendCalls, useCallsStatus } from 'wagmi/experimental';
 import NFT from './NFT';
 
-const cryptoCoins = ['Mochi', 'TYBG', 'Brett', 'Miggles', 'Toshi', 'Keycat', 'Mobi'];
+const cryptoCoins = ['Mochi', 'TYBG', 'Brett', 'Miggles', 'Toshi', 'Keycat', 'Moby'];
 const durationOptions = ["every day", "every week"];
 
 export default function OrderForm({
@@ -20,7 +20,7 @@ export default function OrderForm({
   credential: any;
 }) {
   const [selectedCoin, setSelectedCoin] = useState("");
-  const [order, setOrder] = useState("Buy me based cat coins.");
+  const [order, setOrder] = useState("Buy me based meme coins.");
   const [budget, setBudget] = useState("0.01");
   const [duration, setDuration] = useState("every day");
   const [callsId, setCallsId] = useState<string>();
